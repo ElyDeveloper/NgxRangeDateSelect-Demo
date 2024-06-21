@@ -14,4 +14,11 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent {
   title = 'demo';
+  range: any = {};
+
+  handleRangeDate(event: any) {
+    this.range = event;
+    console.log('Rango de fechas recibido:', this.range);
+  }
+
 }

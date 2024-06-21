@@ -1,4 +1,4 @@
-import { Component, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import moment from 'moment';
 import {
@@ -19,25 +19,6 @@ interface DateRange {
   imports: [FormsModule, NgbDatepickerModule],
   template: `
     <div>
-      <!-- Selector de rango de fechas -->
-
-      <!-- Selector de rango de fechas personalizado -->
-      <!-- <div class="input-group mt-2" [class.d-none]="!isCustomRange">
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="rangeDateCustom[0]"
-          (ngModelChange)="onChange($event)"
-        />
-        <span class="input-group-text">a</span>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="rangeDateCustom[1]"
-          (ngModelChange)="onChange($event)"
-        />
-      </div> -->
-
       <form class="row row-cols-sm-auto">
         <div class="col-12">
           <div class="input-group">
@@ -139,19 +120,18 @@ interface DateRange {
   `,
 })
 export class NgxRangeDateSelectComponent {
-  @Output() rangeDateSelect: DateRange = {
+  @Output() rangeDateOut: EventEmitter<DateRange> = new EventEmitter<DateRange>();
+
+  rangeDate: DateRange = {
     startDate: '',
-    endDate: '',
+    endDate: ''
   };
 
   //************* Atributos de selección *************/
   isCustomRange: boolean = false;
   typeRange: string = 'today';
 
-  rangeDate: DateRange = {
-    startDate: '',
-    endDate: '',
-  };
+  
 
 
   //************* Atributos de selección de componente *************/
@@ -166,6 +146,10 @@ export class NgxRangeDateSelectComponent {
     'd',
     10
   );
+
+  emitRangeDate() {
+    this.rangeDateOut.emit(this.rangeDate);
+  }
 
   onDateSelection(date: NgbDate) {
     if (!this.fromDate && !this.toDate) {
@@ -222,18 +206,17 @@ export class NgxRangeDateSelectComponent {
       .startOf('day')
       .format('YYYY-MM-DD HH:mm:ss');
 
-    console.log(this.rangeDate.startDate, this.rangeDate.endDate);
+    // console.log(this.rangeDate.startDate, this.rangeDate.endDate);
   }
 
   onSelectRange(event: any) {
-    console.log(event);
     const range = event;
     const now = moment(); // Fecha y hora actual del sistema
     const todayStart = moment().startOf('day').format('YYYY-MM-DD HH:mm:ss');
     this.isCustomRange = range === 'custom' ? true : false;
 
     this.typeRange = range;
-    console.log('Tipo de Rango', this.typeRange);
+    // console.log('Tipo de Rango', this.typeRange);
 
     switch (range) {
       case 'yesterday':
@@ -343,6 +326,8 @@ export class NgxRangeDateSelectComponent {
         // this.initRangeDate();
         break;
     }
+
+    this.emitRangeDate();
 
     // console.log(this.rangeDate.startDate, this.rangeDate.endDate);
   }
