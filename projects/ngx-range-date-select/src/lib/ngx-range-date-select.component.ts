@@ -5,6 +5,7 @@ import {
   NgbCalendar,
   NgbDate,
   NgbDateParserFormatter,
+  NgbDateStruct,
   NgbDatepickerModule,
 } from '@ng-bootstrap/ng-bootstrap';
 
@@ -53,6 +54,7 @@ interface DateRange {
           <div class="dp-hidden position-absolute">
             <div class="input-group">
               <input
+                [disabled]="!isCustomRange"
                 name="datepicker"
                 class="form-control"
                 ngbDatepicker
@@ -81,6 +83,7 @@ interface DateRange {
           </div>
           <div class="input-group">
             <input
+              [disabled]="!isCustomRange"
               #dpFromDate
               class="form-control"
               placeholder="yyyy-mm-dd"
@@ -95,10 +98,14 @@ interface DateRange {
             ></button>
           </div>
         </div>
-        <span class="d-flex justify-content-center align-content-center align-items-center text-center ">- a -</span>
+        <span
+          class="d-flex justify-content-center align-content-center align-items-center text-center "
+          >- a -</span
+        >
         <div class="col-12">
           <div class="input-group">
             <input
+              [disabled]="!isCustomRange"
               #dpToDate
               class="form-control"
               placeholder="yyyy-mm-dd"
@@ -117,22 +124,44 @@ interface DateRange {
     </div>
   `,
   styles: `
-  `,
+  .dp-hidden {
+    width: 0;
+    margin: 0;
+    border: none;
+    padding: 0;
+  }
+  .custom-day {
+    text-align: center;
+    padding: 0.185rem 0.25rem;
+    display: inline-block;
+    height: 2rem;
+    width: 2rem;
+  }
+  .custom-day.focused {
+    background-color: #e6e6e6;
+  }
+  .custom-day.range,
+  .custom-day:hover {
+    background-color: rgb(2, 117, 216);
+    color: white;
+  }
+  .custom-day.faded {
+    background-color: rgba(2, 117, 216, 0.5);
+  }
+`,
 })
 export class NgxRangeDateSelectComponent {
-  @Output() rangeDateOut: EventEmitter<DateRange> = new EventEmitter<DateRange>();
+  @Output() rangeDateOut: EventEmitter<DateRange> =
+    new EventEmitter<DateRange>();
 
   rangeDate: DateRange = {
     startDate: '',
-    endDate: ''
+    endDate: '',
   };
 
   //************* Atributos de selección *************/
   isCustomRange: boolean = false;
   typeRange: string = 'today';
-
-  
-
 
   //************* Atributos de selección de componente *************/
 
@@ -165,6 +194,15 @@ export class NgxRangeDateSelectComponent {
       this.toDate = null;
       this.fromDate = date;
     }
+
+    this.rangeDate.startDate = moment(this.fromDate.year + '-' + this.fromDate.month + '-' + this.fromDate.day)
+      .startOf('day')
+      .format('YYYY-MM-DD HH:mm:ss');
+    this.rangeDate.endDate = moment(this.toDate?.year + '-' + this.toDate?.month + '-' + this.toDate?.day)
+      .startOf('day')
+      .format('YYYY-MM-DD HH:mm:ss');
+
+    this.emitRangeDate();
   }
 
   isHovered(date: NgbDate) {
@@ -326,6 +364,21 @@ export class NgxRangeDateSelectComponent {
         // this.initRangeDate();
         break;
     }
+
+    const d1: NgbDateStruct = {
+      year: moment(this.rangeDate.startDate).year(),
+      month: moment(this.rangeDate.startDate).month() + 1,
+      day: moment(this.rangeDate.startDate).date(),
+    };
+
+    const d2: NgbDateStruct = {
+      year: moment(this.rangeDate.endDate).year(),
+      month: moment(this.rangeDate.endDate).month() + 1,
+      day: moment(this.rangeDate.endDate).date(),
+    };
+    
+    this.fromDate = NgbDate.from(d1);
+    this.toDate = NgbDate.from(d2);
 
     this.emitRangeDate();
 
